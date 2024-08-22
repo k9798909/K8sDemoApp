@@ -1,2 +1,2 @@
 # K8sDemoApp
-k8s 部屬練習
+k8s 部署練習
