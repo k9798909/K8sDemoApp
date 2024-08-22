@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres # StatefulSet 的名稱，這裡定義為 postgres
+spec:
+  selector:
+    matchLabels:
+      app: postgres # matchLabels 必須與 template 中的 labels 一致，用來選擇哪些 Pod 會被這個 StatefulSet 控制
+  serviceName: "postgres" # 這是與 StatefulSet 關聯的 headless service 的名稱，提供穩定的 DNS 名稱
+  replicas: 1 # 指定副本數，默認值是 1。這裡僅啟動一個 PostgreSQL 副本
+  minReadySeconds: 10 # Pod 就緒狀態後最少要維持的時間（秒），這裡設置為 10 秒，默認是 0
+  template:
+    metadata:
+      labels:
+        app: postgres # 必須匹配 selector 中的 matchLabels，用來標識該 Pod 屬於哪個應用
+    spec:
+      terminationGracePeriodSeconds: 10 # 在 Pod 終止之前給予的緩衝時間（秒），這裡設置為 10 秒
+      containers:
+      - name: postgres # 容器的名稱，這裡定義為 postgres
+        image: k9798909/postgres # 容器的映像，這裡使用自定義的 PostgreSQL 映像
+        ports:
+        - containerPort: 5432 # PostgreSQL 的默認端口，這裡設置為 5432
+          name: postgres # 端口的名稱，用於標識
+        env: # 這裡定義環境變數
+        - name: POSTGRES_DB
+          value: postgres # 這是要創建的數據庫名稱
+        - name: POSTGRES_USER
+          value: postgres # 這是要使用的 PostgreSQL 用戶名
+        - name: POSTGRES_PASSWORD
+          value: postgres # 這是用戶的密碼
+        volumeMounts:
+        - name: postgres-storage # 卷的名稱，必須與 volumeClaimTemplates 中的名稱一致
+          mountPath: /var/lib/postgresql/data # 將卷掛載到 PostgreSQL 的數據目錄
+  volumeClaimTemplates:
+  - metadata:
+      name: postgres-storage # 這是 Persistent Volume Claim (PVC) 的名稱，用於存儲數據
+    spec:
+      accessModes: [ "ReadWriteOnce" ] # 訪問模式為 ReadWriteOnce，即一個節點可以讀寫該卷
+      storageClassName: "standard" # 指定存儲類別，以確保使用正確的存儲資源
+      resources:
+        requests:
+          storage: 500Mi # 請求的存儲大小，這裡設定為 500Mi
+
+---
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redis # StatefulSet 的名稱，這裡定義為 redis
+spec:
+  serviceName: "redis" # 與 StatefulSet 關聯的 headless service 名稱，提供穩定的 DNS 名稱
+  replicas: 1 # 副本數，這裡只運行一個 Redis 副本
+  selector:
+    matchLabels:
+      app: redis # matchLabels 必須與 template 中的 labels 一致，用來選擇哪些 Pod 會被這個 StatefulSet 控制
+  template:
+    metadata:
+      labels:
+        app: redis # 必須匹配 selector 中的 matchLabels，用來標識該 Pod 屬於哪個應用
+    spec:
+      terminationGracePeriodSeconds: 10 # Pod 終止之前的緩衝時間，這裡設置為 10 秒
+      containers:
+      - name: redis # 容器名稱，這裡定義為 redis
+        image: k9798909/redis # 容器映像，這裡使用自定義的 Redis 映像
+        env:
+        - name: ALLOW_EMPTY_PASSWORD # Redis 環境變量，允許空密碼
+          value: "true"
+        ports:
+        - containerPort: 6379 # Redis 默認端口，這裡設置為 6379
+          name: redis-port # 端口名稱，標識該端口
+        volumeMounts:
+        - name: redis-storage # 卷的名稱，必須與 volumeClaimTemplates 中的名稱一致
+          mountPath: /data # Redis 的數據目錄，這裡指定為 /data
+  volumeClaimTemplates:
+  - metadata:
+      name: redis-storage # Persistent Volume Claim (PVC) 的名稱，用於存儲數據
+    spec:
+      accessModes: [ "ReadWriteOnce" ] # 訪問模式為 ReadWriteOnce，即一個節點可以讀寫該卷
+      storageClassName: "standard" # 指定存儲類別，以確保使用正確的存儲資源
+      resources:
+        requests:
+          storage: 500Mi # 請求的存儲大小，這裡設定為 500Mi
+

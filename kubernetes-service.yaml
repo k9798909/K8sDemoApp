@@ -1,0 +1,51 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres # Service 的名稱，這裡定義為 postgres
+spec:
+  clusterIP: None # Headless Service，不進行負載均衡
+  selector:
+    app: postgres # selector 必須與 StatefulSet 中的 labels 一致
+  ports:
+  - port: 5432 # PostgreSQL 默認端口
+    name: postgres-port # 端口名稱，用於標識
+    
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis # Service 的名稱，這裡定義為 redis
+spec:
+  clusterIP: None # Headless Service，不進行負載均衡
+  selector:
+    app: redis # selector 必須與 StatefulSet 中的 labels 一致
+  ports:
+  - port: 6379 # Redis 默認端口
+    name: redis-port # 端口名稱，用於標識
+    
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+spec:
+  ports:
+    - port: 8088
+      targetPort: 8088
+  selector:
+    app: backend-service
+    
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: shop-app
+spec:
+  ports:
+    - port: 8080
+      targetPort: 8080
+  selector:
+    app: shop-app

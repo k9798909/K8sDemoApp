@@ -1,0 +1,172 @@
+安裝
+1.用powershell以管理員執行minikube_install.ps1。
+
+啟動
+1.開啟docker後，在命令管理員執行minikube start。
+2.執行start.bat開始部屬
+3.執行Run minikube tunnel
+4.訪問locallhost可以看到網站
+
+指令:
+minikube start  啟動 Minikube
+minikube dashboard  啟動用戶界面。
+kubectl get po -A 顯示集群中所有命名空間下的所有 Pod 資訊。
+kubectl logs <pod-name> -c <container-name> 查看日誌。
+kubectl apply -f xxx.yaml 在 Kubernetes 集群中創建或更新資源。
+kubectl describe statefulset <pod-name> 查看StatefulSet 資訊，包括其狀態、配置、以及可能的錯誤訊息，特別是創建失敗的訊息。
+kubectl get services 列出當前命名空間中的所有 Kubernetes 服務（Service）。
+kubectl get pods 列出當前命名空間中的所有 Pod 資訊。
+kubectl logs <pod-name> 查看指定 Pod 的日誌輸出，有助於監控和排查 Pod 中運行的應用程序。
+kubectl exec -it <pod-name> 進入指定 Pod 的命令行界面。
+kubectl port-forward service/shop-app 8080:8080  將本地 8080 端口轉發到 Kubernetes 集群中名為 shop-app 的服務的 8080 端口，這樣你可以通過 localhost:8080 訪問這個服務。
+Run minikube tunnel  將 Kubernetes 中的 LoadBalancer 暴露到本地網絡
+
+啟用 Minikube 插件
+minikube addons enable ingress 啟用 Minikube 中的 Ingress 插件。
+minikube addons enable ingress-dns 啟用 Minikube 中的 Ingress DNS 插件，用於簡化 DNS 設定，使外部能夠通過域名訪問服務。
+
+1. 集群（Cluster）
+    Kubernetes 集群的主要組成部分
+
+    主節點（Master Node）
+
+    控制平面: 負責集群的管理和調度，包含以下核心組件：
+    API Server: 提供集群的 API 接口，處理 API 請求並返回集群狀態。
+    Controller Manager: 監視集群狀態，確保各種資源（如 Pod、Service 等）按照預期運行。
+    Scheduler: 根據資源需求和調度策略，將容器（Pod）分配到適當的工作節點上。
+    etcd: 分佈式鍵值存儲系統，用於存儲 Kubernetes 集群的所有數據和狀態信息。
+    工作節點（Worker Node）
+
+    Kubelet: 在每個工作節點上運行的代理，負責管理容器的生命週期，並與控制平面進行通信。
+    Kube-Proxy: 管理工作節點上的網絡流量，實現服務的負載均衡。
+    Container Runtime: 容器運行時，負責實際執行和管理容器（如 Docker 或 containerd）。
+    Kubernetes 集群的主要功能
+
+    容器編排: 自動化容器的部署、管理和調度，調度器將容器分配到不同的工作節點上。
+    自動擴展: 根據集群負載，自動擴展或縮減容器數量，例如在應用負載增加時自動增加更多的 Pod。
+    自動修復: 監控集群中的容器和服務，當出現故障時自動替換和修復，以確保應用高可用性。
+    服務發現和負載均衡: 提供內部和外部的服務發現與負載均衡，自動分配網絡流量到健康的容器實例。
+    配置和密鑰管理: 提供 ConfigMap 和 Secret 功能，管理應用配置和敏感數據。
+    滾動更新: 支持應用的滾動更新和回滾，當應用需要更新時逐步滾動更新容器，必要時恢復到先前版本。
+
+2. Pod 的主要特性
+    單位和範圍
+
+    單位: Pod 是 Kubernetes 中最小的部署單位，通常用來運行一個或多個緊密耦合的容器。
+    範圍: Pod 內的容器共享相同的網絡命名空間和存儲卷。
+    容器的協作
+
+    共享資源: Pod 內的容器可以共享 Pod 的網絡 IP 地址和端口，並使用 Pod 的共享存儲卷。
+    協同工作: Pod 內的容器通常協同工作，例如一個容器提供主要功能，另一個容器提供輔助功能。
+    網絡
+
+    IP 地址: 每個 Pod 擁有唯一的 IP 地址，Pod 內的容器使用此 IP 進行內部通信。
+    端口: Pod 內的容器可以使用相同的端口進行通信。
+    存儲
+
+    共享存儲卷: Pod 可以掛載共享存儲卷，這樣 Pod 內的所有容器可以訪問相同的存儲資源。
+    Pod 的生命周期
+
+    創建和啟動: 當 Kubernetes 創建一個 Pod 時，會啟動 Pod 內的容器。
+    運行: Pod 內的容器運行應用程序，並提供服務。
+    終止: 當 Pod 不再需要時，它會被終止，容器也會被停止，Pod 也可能因錯誤或故障被終止。
+    Pod 的類型
+
+    單容器 Pod: 只有一個容器的 Pod，通常用於運行單一應用程序。
+    多容器 Pod: 包含多個容器的 Pod，這些容器通常緊密協作，例如一個容器提供應用服務，另一個提供監控或日志收集功能。
+    Pod 的用例
+
+    應用容器: 用於運行應用程序的容器，這是最常見的用例，Pod 內包含一個或多個應用程序容器。
+    輔助容器: 提供輔助功能如監控、日志收集等，這些容器通常與主容器協作，但不直接提供服務。
+
+3. Deployment 的主要功能
+    自動化管理: 管理應用的部署和更新，確保應用在多個副本中一致運行。
+    滾動更新: 部署新版本時逐步替換舊版 Pod，確保服務不中斷。
+    自動回滾: 如果新版本部署失敗，可以自動回滾到上個穩定版本。
+    擴展/縮減: 根據需求動態調整 Pod 副本數量。
+    自我修復: 如果 Pod 發生崩潰，Deployment 會自動創建新的 Pod 來取代故障的 Pod。
+
+    Deployment 的主要屬性
+        replicas: 指定 Pod 的副本數量，確保應用的高可用性。
+        selector: 定義一組標籤，確保 Deployment 能夠找到並管理對應的 Pod。
+        strategy: 指定 Deployment 的升級策略，常見策略包括滾動更新（RollingUpdate）和重建（Recreate）。
+        template: Pod 的定義模板，描述要部署的容器及其配置。
+
+    常見指令
+        部署應用:kubectl apply -f <deployment.yaml>
+        查看 Deployment 狀態:kubectl get deployments
+        擴展 Pod 副本數量:kubectl scale deployment <deployment-name> --replicas=<number>
+        更新 Deployment:kubectl set image deployment/<deployment-name> <container-name>=<new-image>
+        回滾 Deployment:kubectl rollout undo deployment/<deployment-name>
+
+4. StatefulSet 的主要功能
+    有序部署和更新: Pod 會按順序逐個創建和更新，確保每個 Pod 都按照指定的順序啟動或更新。
+    穩定的網絡標識: 每個 Pod 都有一個固定的 DNS 名稱，允許 Pod 在重新調度或重啟後保持其網絡標識。
+    持久存儲: 與 Pod 綁定的 PersistentVolume（PV）是持久且唯一的，即使 Pod 被刪除或重啟，數據仍然保留在相應的 PV 中。
+    有序縮減: 在縮減 Pod 的數量時，StatefulSet 會按相反的順序逐個刪除 Pod，確保有序關閉。
+
+    StatefulSet 的主要屬性
+        replicas: 指定需要的 Pod 副本數量，每個副本都有固定的標識。
+        serviceName: 用於提供穩定網絡標識的 Headless Service 名稱。
+        selector: 定義一組標籤，確保 StatefulSet 能夠找到並管理對應的 Pod。
+        template: Pod 的定義模板，描述要部署的容器及其配置。
+        volumeClaimTemplates: 定義 PersistentVolumeClaim（PVC）模板，為每個 Pod 創建對應的 PV。
+
+    常見指令
+        部署應用:kubectl apply -f <statefulset.yaml>
+        查看 StatefulSet 狀態:kubectl get statefulsets
+        擴展/縮減 Pod 副本數量:kubectl scale statefulset <statefulset-name> --replicas=<number>
+        更新 StatefulSet:kubectl apply -f <statefulset.yaml>
+        查看 Pod 詳情:kubectl get pods -l app=<app-label>
+
+5. Service 的主要功能
+    服務發現: 提供一個穩定的 IP 和 DNS 名稱，允許其他 Pod 通過 Service 名稱訪問應用程序，無論其背後的 Pod 發生變化。
+    負載均衡: 將流量分配到背後的多個 Pod 上，實現應用的水平擴展和高可用性。
+    跨 Pod 通信: 允許 Kubernetes 集群內的 Pod 通過 Service 進行通信，而不必直接知道各個 Pod 的 IP 地址。
+
+    Service 的類型
+        ClusterIP（預設）: 創建一個集群內部可訪問的虛擬 IP，用於集群內部 Pod 之間的通信。
+        NodePort: 在每個節點上打開一個特定端口，使外部流量可以通過該端口訪問集群內的應用。
+        LoadBalancer: 在支持的雲提供商上，創建一個外部負載均衡器來分配外部流量到集群內的 Pod。
+        ExternalName: 將 Service 名稱映射到一個外部的 DNS 名稱，用於服務的外部訪問。
+
+    Service 的主要屬性
+        selector: 定義一組標籤，用於選擇哪些 Pod 應該由該 Service 來提供服務。
+        ports: 指定 Service 的端口映射，包括集群內部和外部的端口。
+        type: 定義 Service 的類型，如 ClusterIP, NodePort, LoadBalancer, 或 ExternalName。
+        clusterIP: ClusterIP 的虛擬 IP 地址，允許集群內部 Pod 通過這個 IP 訪問服務。
+
+    常見指令
+        創建或更新 Service:kubectl apply -f <service.yaml>
+        查看 Service 狀態:kubectl get services
+        刪除 Service:kubectl delete service <service-name>
+        查看 Service 詳情:kubectl describe service <service-name>
+
+6. Ingress 的主要功能
+    HTTP/HTTPS 路由: 提供基於主機名、路徑的路由功能，使外部 HTTP/HTTPS 請求能夠被分發到集群內的 Service。
+    TLS/SSL 支持: 通過配置 TLS 証書來提供 HTTPS 訪問，保障數據傳輸的安全性。
+    虛擬主機: 支持基於主機名的虛擬主機配置，允許同一個 IP 地址上服務多個域名。
+    反向代理: 充當集群內部應用的反向代理，管理內部的多個應用的訪問入口。
+
+    Ingress 的主要屬性
+        rules: 定義一組路由規則，根據請求的主機名和路徑，將流量分發到相應的 Service。
+        backend: 配置預設的後端服務，當請求無法匹配到任何規則時，流量將被轉發到此處。
+        tls: 配置 TLS/SSL 設置，用於定義 Ingress 如何處理 HTTPS 流量，包括指定証書。
+        annotations: 用於配置 Ingress 控制器的特定行為，如重定向、超時設置等。
+    Ingress 控制器
+        Ingress 本身只是一個 API 對象，它需要一個 Ingress 控制器來實際處理流量。常見的 Ingress 控制器有：
+            Nginx Ingress Controller: 最常見的選擇，使用 Nginx 作為反向代理和負載均衡器。
+            Traefik Ingress Controller: 輕量級的 Ingress 控制器，支持自動發現和動態配置。
+            HAProxy Ingress Controller: 以 HAProxy 為基礎的 Ingress 控制器，適合高性能需求。
+
+7. Secret 的主要功能
+    存儲敏感數據: Secret 用於存儲敏感信息，例如密碼、API 金鑰、TLS 憑證等，這些數據不應該以明文形式存儲在配置文件中。
+    避免明文暴露: 使用 Secret 可以避免將敏感數據直接寫入到 Pod 規範或容器鏡像中，提高應用的安全性。
+    動態加載: Secret 可以動態掛載到 Pod 中，並且可以在不重啟 Pod 的情況下更新數據。
+
+    Secret 的主要類型
+        Opaque（不透明）: 預設類型，用於存儲任意二進制數據或文本數據。
+        TLS: 專門用於存儲 TLS 憑證，包括 tls.crt 和 tls.key。
+        docker-registry: 用於存儲 Docker 鏡像庫的憑證，通常用於私有鏡像庫的認證。
+        basic-auth: 用於存儲基本認證（username 和 password）。
+        ssh-auth: 用於存儲 SSH 認證資料（如 SSH 私鑰）。
