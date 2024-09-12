@@ -29,13 +29,13 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: backend-service
+  name: shop-app-backend
 spec:
   ports:
     - port: 8088
       targetPort: 8088
   selector:
-    app: backend-service
+    app: shop-app-backend
     
 ---
 

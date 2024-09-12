@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: backend-service
+  name: shop-app-backend
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: backend-service
+      app: shop-app-backend
   template:
     metadata:
       labels:
-        app: backend-service
+        app: shop-app-backend
     spec:
       containers:
-      - name: backend-service
-        image: k9798909/backend-service
+      - name: shop-app-backend
+        image: k9798909/shop-app-backend
         ports:
         - containerPort: 8088
         env:
